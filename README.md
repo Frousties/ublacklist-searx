@@ -1,5 +1,7 @@
 # uBlacklist
 
+[简体中文](README.zh-CN.md)
+
 Blocks specific sites from appearing in Google search results
 
 [Chrome Web Store](https://chrome.google.com/webstore/detail/ublacklist/pncfbmialoiaghdehhbnbhkkgmjanfhe) / [Firefox Add-ons](https://addons.mozilla.org/en-US/firefox/addon/ublacklist/) / [App Store](https://apps.apple.com/us/app/ublacklist-for-safari/id1547912640) (for macOS and iOS, thanks to [Group-Leafy](https://github.com/HoneyLuka/uBlacklist/tree/safari-port/safari-project))
@@ -22,19 +24,19 @@ This extension is available in the below search engines.
 |              | Web                | Images             | Videos             | News               |
 | ------------ | ------------------ | ------------------ | ------------------ | ------------------ |
 | Google       | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| Bing         | \*1                | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
-| Brave        | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| Bing         | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| Brave \*3    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | DuckDuckGo   | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | Ecosia       | :heavy_check_mark: |                    |                    |                    |
-| Qwant        | :heavy_check_mark: | :heavy_check_mark: | \*2                | :heavy_check_mark: |
-| SearX \*3    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
+| Qwant        | :heavy_check_mark: | :heavy_check_mark: | \*1                | :heavy_check_mark: |
+| SearX \*2    | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: | :heavy_check_mark: |
 | Startpage    | :heavy_check_mark: |                    | :heavy_check_mark: | :heavy_check_mark: |
 | Yahoo! JAPAN | :heavy_check_mark: |                    |                    |                    |
 | Yandex       | :heavy_check_mark: |                    |                    | :heavy_check_mark: |
 
-\*1 In Firefox, only if "Open links in new tab" is turned off<br>
-\*2 Only if "Always play videos on Qwant.com" is turned off<br>
-\*3 Only certain public instances are supported
+\*1 Only if "Always play videos on Qwant.com" is turned off<br>
+\*2 Only certain public instances are supported. If you want to add support for your own SearX/SearXNG search engine, edit `src/common/search-engines.ts` and build the extension manually<br>
+\*3 Due to the difficulty in obtaining the full URLs of image links, this extension does not support per-subdomain blocking in Brave Image Search. (For example, if the link is to "www.example.com", it will block the entire "example.com").
 
 ## For subscription providers
 
@@ -54,16 +56,16 @@ https://iorate.github.io/ublacklist/subscribe?name=Example&url=https%3A%2F%2Fraw
 
 ### Build
 
-To build this extension, [Node.js](https://nodejs.org/en/) and [Yarn](https://yarnpkg.com/) are required.
+To build this extension, [Node.js](https://nodejs.org/en/)>=16 and [Yarn](https://yarnpkg.com/) are required.
 
 ```shell
-git clone https://github.com/iorate/uBlacklist.git
+git clone https://github.com/iorate/ublacklist.git
 
-cd uBlacklist
+cd ublacklist
 
 yarn
 
-# yarn build <browser:=chrome-mv3> <mode:=development> <typecheck:=notypecheck>
+# yarn build <browser:=chrome-mv3> <mode:=development>
 yarn build firefox production
 ```
 

@@ -111,7 +111,7 @@ const syncSections: readonly SyncSection[] = [
     afterDownload(cloudItems, cloudContent, cloudModifiedTime) {
       const items = S.parse(
         cloudContent,
-        S.object({
+        S.type({
           skipBlockDialog: S.boolean(),
           hideBlockLinks: S.boolean(),
           hideControl: S.boolean(),
@@ -165,7 +165,7 @@ const syncSections: readonly SyncSection[] = [
     afterDownload(cloudItems, cloudContent, cloudModifiedTime) {
       const items = S.parse(
         cloudContent,
-        S.object({
+        S.type({
           linkColor: S.string(),
           blockColor: S.string(),
           highlightColors: S.array(S.string()),
@@ -215,7 +215,7 @@ const syncSections: readonly SyncSection[] = [
     afterDownload(cloudItems, cloudContent, cloudModifiedTime, localItems) {
       const items = S.parse(
         cloudContent,
-        S.array(S.object({ name: S.string(), url: S.string(), enabled: S.optional(S.boolean()) })),
+        S.array(S.type({ name: S.string(), url: S.string(), enabled: S.optional(S.boolean()) })),
       );
       if (!items) {
         throw new Error(`File corrupted: ${SYNC_SUBSCRIPTIONS_FILENAME}`);
@@ -264,7 +264,8 @@ async function doSync(dirtyFlags: SyncDirtyFlags, repeat: boolean): Promise<void
       return;
     }
     if (repeat) {
-      browser.alarms.create(SYNC_ALARM_NAME, { periodInMinutes: localItems.syncInterval });
+      // `chrome.alarms.create` returns `Promise` in Chrome >=111.
+      void browser.alarms.create(SYNC_ALARM_NAME, { periodInMinutes: localItems.syncInterval });
     }
 
     const cloudItems: Partial<RawStorageItems> = {};

@@ -5,13 +5,17 @@ import { handleSerp, hasDarkBackground, insertElement } from './helpers';
 function getURLFromPing(selector: string): (root: HTMLElement) => string | null {
   return root => {
     const a = selector ? root.querySelector(selector) : root;
-    if (!(a instanceof HTMLAnchorElement) || !a.ping) {
+    if (!(a instanceof HTMLAnchorElement)) {
       return null;
     }
-    try {
-      return new URL(a.ping, window.location.href).searchParams.get('url');
-    } catch {
-      return null;
+    if (a.ping) {
+      try {
+        return new URL(a.ping, window.location.href).searchParams.get('url');
+      } catch {
+        return null;
+      }
+    } else {
+      return a.href;
     }
   };
 }
@@ -117,10 +121,21 @@ const mobileSerpHandlers: Record<string, SerpHandler> = {
       // Regular (iOS)
       {
         target: '.xpd',
-        level: target =>
-          // Web Result with Site Links
-          target.parentElement?.closest<HTMLElement>('.mnr-c.g') ||
-          (target.querySelector('.xpd') ? null : target),
+        level: target => {
+          if (target.querySelector('.kCrYT')) {
+            // Firefox
+            return null;
+          }
+          const webResultWithSiteLinks =
+            target.parentElement?.closest<HTMLElement>('.Ww4FFb.g, .mnr-c.g');
+          if (webResultWithSiteLinks) {
+            return webResultWithSiteLinks;
+          }
+          if (target.querySelector('.xpd')) {
+            return null;
+          }
+          return target;
+        },
         url: getURLFromPing('a'),
         title: '[role="heading"][aria-level="3"]',
         actionTarget: '',
@@ -213,6 +228,11 @@ const mobileSerpHandlers: Record<string, SerpHandler> = {
         target: '[id^="arc-srp_"] > div',
         innerTargets: '.xpd',
       },
+      // Results in tabs (iOS)
+      {
+        target: '.yl > div',
+        innerTargets: '.xpd',
+      },
     ],
   }),
   // Books
@@ -274,19 +294,16 @@ const mobileSerpHandlers: Record<string, SerpHandler> = {
     ],
     entryHandlers: [
       {
-        target: '.isv-r, .isv-r > .VFACy',
-        level: '.isv-r',
-        url: '.VFACy',
-        title: root => {
-          const a = root.querySelector<HTMLElement>('.VFACy');
-          return a?.firstChild?.textContent ?? null;
-        },
+        target: '.isv-r[role="listitem"]',
+        url: 'a:not([role="button"])',
+        title: 'h2',
         actionTarget: '',
         actionStyle: {
           display: 'block',
           fontSize: '12px',
-          margin: '-8px 0 8px',
+          margin: '-4px 0',
           overflow: 'hidden',
+          padding: '4px 0',
           position: 'relative',
           ...iOSButtonStyle,
         },
@@ -355,8 +372,8 @@ const mobileSerpHandlers: Record<string, SerpHandler> = {
   // Videos
   vid: handleSerp({
     globalStyle: {
-      '.ucBsPc': {
-        height: '108px',
+      '.RDE29e.RDE29e': {
+        margin: '12px 12px 20px 16px',
       },
       ...mobileGlobalStyle,
     },
@@ -382,14 +399,17 @@ const mobileSerpHandlers: Record<string, SerpHandler> = {
     ],
     entryHandlers: [
       {
-        target: 'video-voyager',
+        target: '.mnr-c',
         url: 'a[ping]',
-        title: '.V82bz',
-        actionTarget: '.b5ZQcf',
+        title: root => root.querySelector('[role="heading"][aria-level="3"]')?.ariaLabel ?? null,
+        actionTarget: '.RDE29e',
         actionStyle: {
           display: 'block',
           fontSize: '12px',
-          marginTop: '4px',
+          lineHeight: '16px',
+          padding: '4px 0',
+          position: 'absolute',
+          top: '100%',
           ...iOSButtonStyle,
         },
       },
@@ -405,7 +425,7 @@ const mobileSerpHandlers: Record<string, SerpHandler> = {
       // iOS
       {
         target: '[id^="arc-srp_"] > div',
-        innerTargets: 'video-voyager',
+        innerTargets: '.mnr-c',
       },
     ],
   }),

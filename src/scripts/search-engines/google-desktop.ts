@@ -44,15 +44,36 @@ const desktopRegularActionStyle: CSSAttribute = {
   fontSize: '14px',
   lineHeight: 1.3,
   visibility: 'visible',
+  // next to two-line header (`.TbwUpd.NJjxre.iUh30.ojE3Fb`)
+  '.ojE3Fb + &': {
+    fontSize: '12px',
+    lineHeight: 1.5,
+    marginTop: '20px',
+  },
+  // under two-line header
+  '.ojE3Fb &': {
+    fontSize: '12px',
+    lineHeight: 1.5,
+  },
+  // next to "translate this page" (`.fl.iUh30`)
+  '.fl + &': {
+    paddingTop: '1px',
+  },
+  // next to "translate this language" under two-line header
+  '.ojE3Fb .fl + &': {
+    paddingTop: 0,
+  },
 };
 
 const regularEntryHandler: Pick<EntryHandler, 'actionTarget' | 'actionPosition' | 'actionStyle'> = {
-  actionTarget: root => root.querySelector('.rnBE4e, .m7Ijp, .eFM0qc') || root,
+  // An entry has `a > .TbwUpd` and `div > .TbwUpd`...
+  actionTarget: root =>
+    root.querySelector('.eFM0qc') || root.querySelector('div > .TbwUpd') || root,
   actionPosition: target => {
-    if (target.matches('.rnBE4e, .m7Ijp')) {
-      return insertElement('span', target, 'beforebegin');
-    } else if (target.matches('.eFM0qc')) {
+    if (target.matches('.eFM0qc')) {
       return insertActionBeforeMenu(target);
+    } else if (target.matches('.TbwUpd')) {
+      return insertElement('span', target, 'afterend');
     } else {
       const actionRoot = insertElement('span', target, 'beforeend');
       actionRoot.dataset.ubFallback = '1';
@@ -84,10 +105,22 @@ const desktopSerpHandlers: Record<string, SerpHandler> = {
       '.FxLDp:has(> .MYVUIe:only-child [data-ub-blocked="hidden"])': {
         display: 'none',
       },
+      // Hide overflowed actions in top stories
+      '.OSrXXb': {
+        whiteSpace: 'nowrap',
+      },
     },
     controlHandlers: [
       {
         target: '#result-stats',
+      },
+      {
+        target: '#slim_appbar:empty',
+        style: {
+          '#slim_appbar > &:not(:only-child)': {
+            display: 'none',
+          },
+        },
       },
       {
         target: '#botabar',
@@ -111,7 +144,9 @@ const desktopSerpHandlers: Record<string, SerpHandler> = {
     entryHandlers: [
       // Regular, Web Result
       {
-        target: '[data-header-feature] + [data-content-feature], [data-header-feature] + .Z26q7c',
+        // The first child should be the header...
+        target:
+          '[data-snf]:nth-child(2), [data-sokoban-feature]:nth-child(2), [data-content-feature]:nth-child(2)',
         level: 2,
         url: 'a',
         title: 'h3',
@@ -155,24 +190,31 @@ const desktopSerpHandlers: Record<string, SerpHandler> = {
         target: '.g .xpdopen .ifM9O .g',
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         level: target => target.closest('.M8OgIe') || target.parentElement!.closest('.g'),
-        url: '.yuRUbf > a',
+        url: '.yuRUbf a',
         title: 'h3',
         ...regularEntryHandler,
       },
       // Latest, Top Story (Horizontal)
       {
-        target: '.JJZKK .kno-fb-ctx, .JJZKK .kno-fb-ctx .ZE0LJd, .JJZKK .kno-fb-ctx .S1FAPd',
+        target: '.IJl0Z',
+        url: 'a',
+        title: '[role="heading"][aria-level="3"]',
+        actionTarget: '.OSrXXb',
+        actionStyle: desktopActionStyle,
+      },
+      {
+        target: '.JJZKK .kno-fb-ctx',
         level: '.JJZKK',
         url: 'a',
         title: '[role="heading"][aria-level="3"]',
-        actionTarget: '.ZE0LJd, .S1FAPd',
+        actionTarget: '.OSrXXb',
         actionStyle: desktopActionStyle,
       },
       // People Also Ask
       {
         target: '.related-question-pair .g',
         level: '.related-question-pair',
-        url: '.yuRUbf > a',
+        url: '.yuRUbf a',
         title: root => root.querySelector('h3')?.textContent ?? null,
         ...regularEntryHandler,
       },
@@ -202,7 +244,7 @@ const desktopSerpHandlers: Record<string, SerpHandler> = {
       },
       // Top Story (Vertical)
       {
-        target: '.yG4QQe .WlydOe .ZE0LJd, .yG4QQe .WlydOe .S1FAPd',
+        target: '.yG4QQe .WlydOe .OSrXXb',
         level: target => {
           if (target.matches('.JJZKK *')) {
             // Latest, Top story (Horizontal)
@@ -212,8 +254,8 @@ const desktopSerpHandlers: Record<string, SerpHandler> = {
           return target.closest('.WlydOe')!.parentElement;
         },
         url: '.WlydOe',
-        title: '.mCBkyc',
-        actionTarget: '.ZE0LJd, .S1FAPd',
+        title: '[role="heading"][aria-level="3"]',
+        actionTarget: '.OSrXXb',
         actionStyle: actionRoot => {
           // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
           actionRoot.parentElement!.style.whiteSpace = 'nowrap';
@@ -246,7 +288,8 @@ const desktopSerpHandlers: Record<string, SerpHandler> = {
                 }
               : {
                   ...desktopRegularActionStyle,
-                  // Generate new stacking context
+                  bottom: '7px',
+                  fontSize: '12px',
                   position: 'relative',
                   zIndex: 1,
                 },
@@ -255,18 +298,18 @@ const desktopSerpHandlers: Record<string, SerpHandler> = {
       },
       // Video
       {
-        target: '.dXiKIc',
+        target: '.iHxmLe',
         level: '.g',
         url: 'a',
         title: 'h3',
         ...regularEntryHandler,
       },
       {
-        target: '.RzdJxc .hMJ0yc',
+        target: '.RzdJxc .OwbDmd',
         level: '.RzdJxc',
-        url: '.X5OiLe',
+        url: 'a:not([href="#"])',
         title: '.fc9yUc',
-        actionTarget: '.hMJ0yc',
+        actionTarget: '.OwbDmd',
         actionStyle: desktopActionStyle,
       },
       // YouTube and TikTok Channel
@@ -301,13 +344,14 @@ const desktopSerpHandlers: Record<string, SerpHandler> = {
       {
         target: '.yl > div',
         innerTargets:
-          '.YwonT, [data-content-feature], .Z26q7c, .IsZvec, .kno-fb-ctx, .ZE0LJd, .S1FAPd, .g, .F9rcV, .hMJ0yc',
+          '.YwonT, [data-snf], [data-sokoban-feature], [data-content-feature], .IsZvec, .kno-fb-ctx, .ZE0LJd, .S1FAPd, .g, .F9rcV, .hMJ0yc',
       },
       // AutoPagerize and Continuous scrolling (US)
       {
         target: '.autopagerize_page_info ~ div, [id^="arc-srp"] > div',
         // Regular, Video, and YouTube and TikTok channel
-        innerTargets: '[data-context-feature], .Z26q7c, .IsZvec, .dXiKIc, .d3zsgb, .rULfzc',
+        innerTargets:
+          '[data-snf], [data-sokoban-feature], [data-content-feature], .IsZvec, .g, .iHxmLe, .d3zsgb, .rULfzc',
       },
     ],
   }),
@@ -346,46 +390,32 @@ const desktopSerpHandlers: Record<string, SerpHandler> = {
     ],
     entryHandlers: [
       {
-        target: '.isv-r, .isv-r > .VFACy',
-        level: '.isv-r',
-        url: '.VFACy',
+        target: '.isv-r[role="listitem"]',
+        url: 'a:not([role="button"])',
         title: root => {
-          const a = root.querySelector<HTMLElement>('.VFACy');
+          const a = root.querySelector<HTMLElement>('a:not([role="button"])');
           return a?.title ?? null;
         },
         actionTarget: '',
-        actionStyle: actionRoot => {
-          const style: CSSAttribute = {
-            display: 'block',
-            fontSize: '11px',
-            marginTop: '-8px',
-            position: 'relative',
-          };
-          if (actionRoot.matches('[jsname="BWRNE"] *')) {
-            // Related images
-            style['& > .ub-button'] = {
-              color: 'var(--ub-link-color, #609beb)',
-            };
-          } else {
-            style['[data-ub-blocked="visible"] &'] = {
-              backgroundColor: 'var(--ub-block-color, rgba(255, 192, 192, 0.5))',
-            };
-          }
-          actionRoot.className = css(style);
+        actionStyle: {
+          display: 'block',
+          fontSize: '11px',
         },
-      },
-    ],
-    pagerHandlers: [
-      // Related images
-      {
-        target: '[jsname="BWRNE"]',
-        innerTargets: '.isv-r',
       },
     ],
   }),
   // News
   nws: handleSerp({
-    globalStyle: desktopGlobalStyle,
+    globalStyle: {
+      ...desktopGlobalStyle,
+      '[data-ub-blocked] .kno-fb-ctx, [data-ub-highlight] .kno-fb-ctx': {
+        backgroundColor: 'transparent !important',
+      },
+      // Hide overflowed actions
+      '.OSrXXb': {
+        whiteSpace: 'nowrap',
+      },
+    },
     controlHandlers: [
       {
         target: '#result-stats',
@@ -393,6 +423,13 @@ const desktopSerpHandlers: Record<string, SerpHandler> = {
     ],
     entryHandlers: [
       // Regular
+      {
+        target: '.SoaBEf, .JJZKK',
+        url: 'a',
+        title: '[role="heading"][aria-level="3"]',
+        actionTarget: '.OSrXXb',
+        actionStyle: desktopActionStyle,
+      },
       {
         target: '.WlydOe .ZE0LJd, .WlydOe .S1FAPd',
         level: target => target.closest('.ftSUBd') || target.closest('.WlydOe'),
@@ -422,7 +459,7 @@ const desktopSerpHandlers: Record<string, SerpHandler> = {
       // AutoPagerize
       {
         target: '.autopagerize_page_info ~ div',
-        innerTargets: '.ZE0LJd, .S1FAPd',
+        innerTargets: '.SoaBEf, .JJZKK, .ZE0LJd, .S1FAPd',
       },
     ],
   }),
@@ -436,7 +473,7 @@ const desktopSerpHandlers: Record<string, SerpHandler> = {
     ],
     entryHandlers: [
       {
-        target: '.dXiKIc',
+        target: '.g, .iHxmLe',
         level: '.g',
         url: 'a',
         title: 'h3',
@@ -449,7 +486,7 @@ const desktopSerpHandlers: Record<string, SerpHandler> = {
       // AutoPagerize
       {
         target: '.autopagerize_page_info ~ div',
-        innerTargets: '.dXiKIc',
+        innerTargets: '.g',
       },
     ],
   }),
